@@ -87,14 +87,49 @@
      });
  });
 
- // Form submission
- const contactForm = document.getElementById('contactForm');
- contactForm.addEventListener('submit', (e) => {
-     e.preventDefault();
-     
-     // Here you would typically send the form data to a server
-     alert('Thank you for your message! We will contact you shortly.');
-     contactForm.reset();
- });
+ document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('deliveryForm');
+    const formStatus = document.getElementById('formStatus');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
 
+        
+        // Change button text to indicate loading
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.textContent;
+        submitBtn.textContent = 'Sending...';
+        submitBtn.disabled = true;
+        
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                formStatus.textContent = 'Thank you! Your delivery request has been submitted. We will contact you shortly.';
+                formStatus.className = 'form-status success';
+                form.reset();
+            } else {
+                throw new Error('Form submission failed');
+            }
+        } catch (error) {
+            formStatus.textContent = 'Oops! There was a problem submitting your form. Please try again later or contact us directly.';
+            formStatus.className = 'form-status error';
+            console.error('Error:', error);
+        } finally {
+            submitBtn.textContent = originalBtnText;
+            submitBtn.disabled = false;
+            
+            // Scroll to show the status message
+            formStatus.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        form.reset();
+
+    });
+});
     
